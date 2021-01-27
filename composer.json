@@ -1,7 +1,7 @@
 {
   "name": "mehr-it/lara-model-aspects",
   "type": "library",
-  "description": "Add extra functionality concerning to models in extra classes",
+  "description": "Add extra functionality concerning to models in separate classes",
   "keywords": [
     "aspects",
     "model functionality",
