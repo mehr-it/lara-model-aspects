@@ -1,0 +1,46 @@
+{
+  "name": "mehr-it/lara-model-aspects",
+  "type": "library",
+  "description": "Add extra functionality concerning to models in extra classes",
+  "keywords": [
+    "aspects",
+    "model functionality",
+    "laravel",
+    "model"
+  ],
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Christopher Mieger",
+      "email": "mail@mehr-it.info"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MehrIt\\LaraModelAspects\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MehrItLaraModelAspectsTests\\": "test/"
+    }
+  },
+  "require": {
+    "php": ">=7.1",
+    "laravel/framework": "^6.0|^7.0|^8.0",
+    "ext-pdo": "*"
+  },
+  "require-dev": {
+    "ext-json": "*",
+    "phpunit/phpunit": "^7.4|^8.4",
+    "orchestra/testbench": "^4.0|^5.0|^6.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MehrIt\\LaraModelAspects\\Provider\\LaraModelAspectsServiceProvider"
+      ]
+    }
+  }
+}
