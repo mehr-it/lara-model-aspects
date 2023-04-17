@@ -4,10 +4,8 @@
 	namespace MehrItLaraModelAspectsTests\Cases;
 
 
-
-
-
 	use BadMethodCallException;
+	use InvalidArgumentException;
 	use MehrItLaraModelAspectsTests\Model\Aspects\TestModelAspects;
 	use MehrItLaraModelAspectsTests\Model\TestModel;
 	use MehrItLaraModelAspectsTests\Model\TestModelWithParent;
@@ -59,7 +57,7 @@
 
 		public function testWithAspects_resetsModelAfterwards() {
 
-			$model = new TestModel();
+			$model       = new TestModel();
 			$modelBefore = new TestModel();
 
 			$asp = TestModel::newAspects();
@@ -82,7 +80,6 @@
 		public function testResetAspects() {
 
 			$model = new TestModel();
-
 
 
 			$model->withAspects(function (TestModelAspects $aspects) use ($model, &$aspectsCall1) {
@@ -149,6 +146,78 @@
 			$model = new TestModelWithParentAndCallHandler();
 
 			$this->assertTrue($model->notAnAspectMethod());
+
+		}
+
+		public function testWithAspectMocks() {
+
+			$model = new TestModel();
+
+			$res = null;
+			TestModel::withAspectMocks(function () use (&$res, $model) {
+				$res = $model->aspectMethod(9, 10);
+			}, [
+				'aspectMethod' => function ($m, $i, $j) use ($model) {
+					$this->assertSame($model, $m);
+
+					return $i + $j;
+				}
+			]);
+
+			$this->assertSame(19, $res);
+
+			// now, aspects should not be mocked anymore
+			$in = new stdClass();
+			$this->assertSame(1, $model->aspectMethod($in)[1]);
+
+		}
+		
+		public function testWithAspectMocks_nested() {
+
+			$model = new TestModel();
+
+			$res = null;
+			$res2 = null;
+			TestModel::withAspectMocks(function () use (&$res, &$res2, $model) {
+				$res = $model->aspectMethod(9, 10);
+
+				TestModel::withAspectMocks(function () use (&$res2, $model) {
+					$res2 = $model->aspectMethod(9, 10);
+				}, [
+					'aspectMethod' => function ($m, $i, $j) use ($model) {
+						$this->assertSame($model, $m);
+
+						return $i - $j;
+					}
+				]);
+				
+			}, [
+				'aspectMethod' => function ($m, $i, $j) use ($model) {
+					$this->assertSame($model, $m);
+
+					return $i + $j;
+				}
+			]);
+			
+
+			$this->assertSame(19, $res);
+			$this->assertSame(-1, $res2);
+
+			// now, aspects should not be mocked anymore
+			$in = new stdClass();
+			$this->assertSame(1, $model->aspectMethod($in)[1]);
+
+		}
+
+		public function testWithAspectMocks_invalidMethodName() {
+
+			$this->expectException(InvalidArgumentException::class);
+
+			TestModel::withAspectMocks(function () {
+			}, [
+				'notImplementedMethod' => function () {}
+			]);
+
 
 		}
 

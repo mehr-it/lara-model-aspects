@@ -15,6 +15,11 @@
 		protected static $aspectClass;
 
 		/**
+		 * @var callable[]|null
+		 */
+		protected static $aspectMocks;
+
+		/**
 		 * @var AbstractModelAspects
 		 */
 		protected $aspects;
@@ -97,10 +102,39 @@
 		}
 
 		/**
+		 * Executes the given callback with given aspect methods mocked
+		 * @param callable $callback The callback to execute
+		 * @param callable[] $mockCallbacks The mocked aspect methods. Method name as key.
+		 * @return mixed The callback return
+		 */
+		public static function withAspectMocks(callable $callback, array $mockCallbacks) {
+			$aspects = static::newAspects();
+			
+			$mocksBefore = self::$aspectMocks;
+
+			try {
+				foreach ($mockCallbacks as $name => $_) {
+					if (!is_callable([$aspects, $name]))
+						throw new InvalidArgumentException("Cannot mock aspect method " . get_class($aspects) . "::{$name}(). {$name}() is not callable.");
+				}
+
+				self::$aspectMocks = $mockCallbacks;
+				
+				return call_user_func($callback);
+			}
+			finally {
+				self::$aspectMocks = $mocksBefore;
+			}
+		}
+
+		/**
 		 * @inheritDoc
 		 */
 		public function __call($name, $arguments) {
 
+			if (self::$aspectMocks[$name] ?? null)
+				return call_user_func(self::$aspectMocks[$name], $this, ...$arguments);
+			
 			$aspects = $this->aspects();
 
 			if (is_callable([$aspects, $name])) {
