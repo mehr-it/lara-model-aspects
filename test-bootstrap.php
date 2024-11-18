@@ -6,6 +6,9 @@
 	echo "Waiting for lock ($lockFile)...\n";
 	flock($fh, LOCK_EX);
 
+    $composerPath = getenv('COMPOSER_PATH') ?: '/usr/local/bin/composer';
+    
+    $composerCmd = PHP_BINARY . ' ' . $composerPath;
 
 	$testPackages = getenv('TEST_PACKAGES');
 
@@ -29,11 +32,11 @@
 		file_put_contents( __DIR__ . '/composer-test.json', json_encode($composerJson, JSON_PRETTY_PRINT));
 
 
-		exec("cd '" . __DIR__ . "' && export COMPOSER=\"composer-test.json\" && composer require --no-interaction --with-all-dependencies $testPackages && composer dump-autoload --no-interaction", $output, $returnVar);
+		exec("cd '" . __DIR__ . "' && export COMPOSER=\"composer-test.json\" && {$composerCmd} require --no-interaction --with-all-dependencies $testPackages && {$composerCmd} dump-autoload --no-interaction", $output, $returnVar);
 	}
 	else {
 		echo "Using default composer.json\n";
-		exec("cd '" . __DIR__ . "' && composer update --with-all-dependencies && composer dump-autoload", $output, $returnVar);
+		exec("cd '" . __DIR__ . "' && {$composerCmd} update --with-all-dependencies &&  {$composerCmd} dump-autoload", $output, $returnVar);
 	}
 
 	echo implode("\n", $output) . "\n";

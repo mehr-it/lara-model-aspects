@@ -35,8 +35,8 @@
 		}
 
 		public function testAssertModelSet() {
-
-			$this->expectNotToPerformAssertions();
+            if (is_callable([$this, 'expectNotToPerformAssertions']))
+			    $this->expectNotToPerformAssertions();
 
 			$model       = new TestModel();
 
@@ -47,8 +47,8 @@
 		}
 
 		public function testAssertModelSet_notSet() {
-
-			$this->expectNotToPerformAssertions();
+            if (is_callable([$this, 'expectNotToPerformAssertions']))
+			    $this->expectNotToPerformAssertions();
 
 			$asp = new TestModelAspects();
 
